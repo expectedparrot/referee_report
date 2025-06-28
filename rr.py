@@ -108,8 +108,8 @@ def main(
         table.add_column("Property", style="cyan", no_wrap=True)
         table.add_column("Value", style="white")
         
-        table.add_row("URL", f"[link]{coop_info['url']}[/link]")
-        table.add_row("Alias URL", f"[link]{coop_info['alias_url']}[/link]")
+        table.add_row("URL", coop_info['url'])
+        table.add_row("Alias URL", coop_info['alias_url'])
         table.add_row("UUID", coop_info['uuid'])
         table.add_row("Version", coop_info['version'])
         table.add_row("Visibility", coop_info['visibility'])
@@ -186,8 +186,8 @@ def main(
             review_table.add_column("Property", style="cyan", no_wrap=True)
             review_table.add_column("Value", style="white")
             
-            review_table.add_row("URL", f"[link]{review_info['url']}[/link]")
-            review_table.add_row("Alias URL", f"[link]{review_info['alias_url']}[/link]")
+            review_table.add_row("URL", review_info['url'])
+            review_table.add_row("Alias URL", review_info['alias_url'])
             review_table.add_row("UUID", review_info['uuid'])
             review_table.add_row("Version", review_info['version'])
             review_table.add_row("Visibility", review_info['visibility'])
