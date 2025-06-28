@@ -11,6 +11,7 @@ Processes PDF files and generates comprehensive referee reports in multiple form
 #   "edsl @ file:///Users/johnhorton/tools/ep/edsl",
 #   "click",
 #   "pyperclip",
+#   "rich",
 # ]
 # ///
 
@@ -21,6 +22,13 @@ from typing import Optional
 import click
 import pyperclip
 from edsl import FileStore, Model, QuestionFreeText, Scenario, Survey
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
+from rich.text import Text
+
+console = Console()
 
 @click.command()
 @click.argument('pdf_file', type=click.Path(exists=True, path_type=Path))
@@ -76,9 +84,9 @@ def main(
         rr.py paper.pdf --pages 10 --clipboard
         rr.py paper.pdf --to_coop --prompt "Provide a technical review"
     """
-    click.echo(f"Processing PDF file: {pdf_file}")
+    console.print(f"[bold blue]Processing PDF file:[/bold blue] {pdf_file}")
     if pages:
-        click.echo(f"Limiting to first {pages} pages")
+        console.print(f"[yellow]Limiting to first {pages} pages[/yellow]")
 
     from edsl import Cache
 
@@ -92,8 +100,21 @@ def main(
     # Push paper to Coop if requested
     coop_info = None
     if to_coop:
-        coop_info = paper.push(description=f"Paper being reviewed: {pdf_file.name}")
-        print(f"INFO: Paper pushed to Coop: {coop_info}")
+        with console.status("[bold green]Pushing paper to Coop..."):
+            coop_info = paper.push(description=f"Paper being reviewed: {pdf_file.name}")
+        
+        # Create a nice table for Coop info
+        table = Table(title="📄 Paper Pushed to Coop", show_header=True, header_style="bold magenta")
+        table.add_column("Property", style="cyan", no_wrap=True)
+        table.add_column("Value", style="white")
+        
+        table.add_row("URL", f"[link]{coop_info['url']}[/link]")
+        table.add_row("Alias URL", f"[link]{coop_info['alias_url']}[/link]")
+        table.add_row("UUID", coop_info['uuid'])
+        table.add_row("Version", coop_info['version'])
+        table.add_row("Visibility", coop_info['visibility'])
+        
+        console.print(table)
 
     # Configure AI models for review generation
     models = [
@@ -116,10 +137,13 @@ def main(
     survey = Survey([review_question])
     
     # Execute the survey across all models
-    results = survey.by(paper).by(models).run(
-        verbose=True, 
-        disable_remote_inference=True
-    )
+    with console.status("[bold green]Generating reviews with AI models..."):
+        results = survey.by(paper).by(models).run(
+            verbose=True, 
+            disable_remote_inference=True
+        )
+    
+    console.print("[bold green]✅ Reviews generated successfully![/bold green]")
 
     # Define report template for formatting results
     report_template = """#
@@ -135,7 +159,7 @@ def main(
             format='text'
         )
         pyperclip.copy(str(formatted_text))
-        print("Report copied to clipboard!")
+        console.print("[bold green]📋 Report copied to clipboard![/bold green]")
     else:
         if to_coop:
             # Create temporary DOCX file and push to Coop
@@ -147,15 +171,28 @@ def main(
                 template=report_template, 
                 format='docx'
             ).save(temp_filename)
-            print(f"Report written to temporary file: {temp_filename}")
+            console.print(f"[dim]Report written to temporary file: {temp_filename}[/dim]")
             
             # Push review to Coop with reference to original paper
-            review_filestore = FileStore(str(temp_filename))
-            paper_url = coop_info['url'] if coop_info else 'unknown'
-            review_info = review_filestore.push(
-                description=f"Review of paper: {pdf_file.name}. Paper at {paper_url}"
-            )
-            print(f"INFO: Review pushed to Coop: {review_info}")
+            with console.status("[bold green]Pushing review to Coop..."):
+                review_filestore = FileStore(str(temp_filename))
+                paper_url = coop_info['url'] if coop_info else 'unknown'
+                review_info = review_filestore.push(
+                    description=f"Review of paper: {pdf_file.name}. Paper at {paper_url}"
+                )
+            
+            # Create a nice table for review Coop info
+            review_table = Table(title="📝 Review Pushed to Coop", show_header=True, header_style="bold magenta")
+            review_table.add_column("Property", style="cyan", no_wrap=True)
+            review_table.add_column("Value", style="white")
+            
+            review_table.add_row("URL", f"[link]{review_info['url']}[/link]")
+            review_table.add_row("Alias URL", f"[link]{review_info['alias_url']}[/link]")
+            review_table.add_row("UUID", review_info['uuid'])
+            review_table.add_row("Version", review_info['version'])
+            review_table.add_row("Visibility", review_info['visibility'])
+            
+            console.print(review_table)
         else:
             # Save to local DOCX file
             output_filename = f"referee_report_{pdf_file.stem}.docx"
@@ -163,7 +200,7 @@ def main(
                 template=report_template, 
                 format='docx'
             ).save(output_filename)
-            print(f"Report generated: {output_filename}")
+            console.print(f"[bold green]📄 Report generated:[/bold green] [cyan]{output_filename}[/cyan]")
 
 
 if __name__ == '__main__':

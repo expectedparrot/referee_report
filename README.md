@@ -22,11 +22,18 @@ The script will automatically manage its dependencies:
 - `edsl` - AI survey framework
 - `click` - Command-line interface
 - `pyperclip` - Clipboard operations
+- `rich` - Enhanced terminal output formatting
 
 ## Usage
 
 ### Basic Usage
 
+**Recommended - Using uv (no installation required):**
+```bash
+uv run rr.py paper.pdf
+```
+
+**Alternative - Using Python directly:**
 ```bash
 python rr.py paper.pdf
 ```
@@ -36,7 +43,7 @@ This will generate a referee report and save it as `referee_report_paper.docx` i
 ### Command Line Options
 
 ```bash
-python rr.py [OPTIONS] PDF_FILE
+uv run rr.py [OPTIONS] PDF_FILE
 ```
 
 **Arguments:**
@@ -54,27 +61,27 @@ python rr.py [OPTIONS] PDF_FILE
 
 **Generate a standard review:**
 ```bash
-python rr.py research_paper.pdf
+uv run rr.py research_paper.pdf
 ```
 
 **Review only the first 10 pages:**
 ```bash
-python rr.py long_paper.pdf --pages 10
+uv run rr.py long_paper.pdf --pages 10
 ```
 
 **Copy review to clipboard:**
 ```bash
-python rr.py paper.pdf --clipboard
+uv run rr.py paper.pdf --clipboard
 ```
 
 **Use custom prompt:**
 ```bash
-python rr.py paper.pdf --prompt "Provide a technical review focusing on methodology"
+uv run rr.py paper.pdf --prompt "Provide a technical review focusing on methodology"
 ```
 
 **Push to Coop platform:**
 ```bash
-python rr.py paper.pdf --to_coop
+uv run rr.py paper.pdf --to_coop
 ```
 
 ## AI Models Used
