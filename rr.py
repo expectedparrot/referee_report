@@ -134,7 +134,9 @@ def main(
         question_text=f'{prompt} {{{{scenario.paper}}}}', 
         question_name='full_review'
     )
-    survey = Survey([review_question])
+    q_suggested = QuestionFreeText(question_name = 'highest_impact_suggestion', 
+                                   question_text = 'Given this review: {{ full_review.answer}} what is the highest impact suggestion for the authors?')
+    survey = Survey([review_question, q_suggested])
     
     # Execute the survey across all models
     with console.status("[bold green]Generating reviews with AI models..."):
@@ -149,6 +151,10 @@ def main(
     report_template = """#
 # Review by {{ model }}
 {{full_review}}
+
+## Highest Impact Suggestion
+
+{{highest_impact_suggestion}}
 
 """
     
