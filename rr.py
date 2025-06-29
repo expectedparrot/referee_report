@@ -134,15 +134,24 @@ def main(
         question_text=f'{prompt} {{{{scenario.paper}}}}', 
         question_name='full_review'
     )
-    q_suggested = QuestionFreeText(question_name = 'highest_impact_suggestion', 
-                                   question_text = 'Given this review: {{ full_review.answer}} what is the highest impact suggestion for the authors?')
-    survey = Survey([review_question, q_suggested])
+    #q_suggested = QuestionFreeText(question_name = 'highest_impact_suggestion', 
+    #                               question_text = 'Given this review: {{ full_review.answer}} what is the highest impact suggestion for the authors?')
+    q_response_to_review = QuestionFreeText(question_name = 'response_to_review', 
+                                   question_text = """You submitted this paper: {{ scenario.paper}}. You received this review {{ full_review.answer}}. 
+                                   Please write a detailed response to the review.
+                                   Push back on critiques that you don't agree with or that you think are wrong and explain why. 
+                                   Support your arguments with evidence from the paper.
+                                   """)
+
+
+    survey = Survey([review_question, q_response_to_review])
     
     # Execute the survey across all models
     with console.status("[bold green]Generating reviews with AI models..."):
         results = survey.by(paper).by(models).run(
             verbose=True, 
-            disable_remote_inference=True
+            disable_remote_inference=True, 
+            refresh = True
         )
     
     console.print("[bold green]✅ Reviews generated successfully![/bold green]")
@@ -152,9 +161,9 @@ def main(
 # Review by {{ model }}
 {{full_review}}
 
-## Highest Impact Suggestion
+## Response to Review
 
-{{highest_impact_suggestion}}
+{{response_to_review}}
 
 """
     
