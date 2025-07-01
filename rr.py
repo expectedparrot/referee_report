@@ -143,8 +143,7 @@ def main(
         You submitted this paper: {{ scenario.paper}}. You received this review {{ full_review.answer}}. 
         Please write a detailed response to the review.
         Push back on critiques that you don't agree with or that you think are wrong and explain why. 
-        Support your arguments with evidence from the paper.
-    """)
+        Support your arguments with evidence from the paper."""))
 
     survey = Survey([review_question, q_response_to_review])
     
