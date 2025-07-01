@@ -8,7 +8,7 @@ Processes PDF files and generates comprehensive referee reports in multiple form
 # requires-python = ">=3.11"
 # dependencies = [
 #   "pip",
-#   "edsl @ file:///Users/johnhorton/tools/ep/edsl",
+#   "edsl @ git+https://github.com/expectedparrot/edsl.git@main",
 #   "click",
 #   "pyperclip",
 #   "rich",
@@ -90,6 +90,10 @@ def main(
 
     from edsl import Cache
 
+    from edsl.extensions.authoring.trigger_login import trigger_login
+
+    trigger_login()
+
     # Create FileStore scenario with optional page limit
     file_store_kwargs = {'path': str(pdf_file)}
     if pages:
@@ -149,9 +153,9 @@ def main(
     # Execute the survey across all models
     with console.status("[bold green]Generating reviews with AI models..."):
         results = survey.by(paper).by(models).run(
-            verbose=True, 
-            disable_remote_inference=True, 
-            refresh = True
+            #verbose=True, 
+            #disable_remote_inference=True, 
+            #refresh = True
         )
     
     console.print("[bold green]✅ Reviews generated successfully![/bold green]")
